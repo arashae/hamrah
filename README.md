@@ -51,4 +51,4 @@ python manage.py test
 
 - نام: Arash
 - ایمیل: slamiarash@gmail.com
-- شماره تماس: 09391477665 
+- شماره تماس: 09391477665
