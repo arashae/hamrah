@@ -76,82 +76,271 @@ python manage.py runserver
 }
 ```
 
-### مدیریت فروشگاه‌ها
+### مدیریت تعاریف پایه
 
-#### لیست فروشگاه‌ها
-- **URL**: `/api/store/stores/`
-- **Method**: `GET`
+#### تعریف شرکت
+- **URL**: `/api/management/define-company/`
+- **Method**: `POST`
 - **Headers**: `Authorization: Bearer <token>`
-- **Query Parameters**:
-  - `city`: فیلتر بر اساس شهر
-  - `type`: فیلتر بر اساس نوع فروشگاه
-  - `company`: فیلتر بر اساس شرکت
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "name": "string"
+}
+```
 - **Response**:
 ```json
 {
-    "count": 0,
-    "next": "string",
-    "previous": "string",
-    "results": [
-        {
-            "id": 0,
-            "name": "string",
-            "city": "string",
-            "type": "string",
-            "company": "string",
-            "manager": "string",
-            "phone_number": "string",
-            "address": "string"
-        }
-    ]
+    "id": 0,
+    "name": "string"
+}
+```
+
+#### تعریف فروشگاه
+- **URL**: `/api/management/define-store/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "username": "string",
+    "password": "string",
+    "name": "string",
+    "city_id": 0,
+    "type": "string",
+    "company_id": 0,
+    "manager": "string",
+    "phone_number": "string",
+    "address": "string"
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "username": "string",
+    "name": "string",
+    "city": "string",
+    "type": "string",
+    "company": "string",
+    "manager": "string",
+    "phone_number": "string",
+    "address": "string"
+}
+```
+
+#### تعریف برند
+- **URL**: `/api/management/define-brand/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "brand": "string"
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "brand": "string"
+}
+```
+
+#### تعریف نوع دستگاه
+- **URL**: `/api/management/define-type/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "category": "string"
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "category": "string"
+}
+```
+
+#### تعریف طرح سهم‌بندی
+- **URL**: `/api/management/define-portion-plan/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "category_id": 0,
+    "MCI_portion": 0.0,
+    "store_portion": 0.0,
+    "supplier_portion": 0.0
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "category": "string",
+    "MCI_portion": 0.0,
+    "store_portion": 0.0,
+    "supplier_portion": 0.0
+}
+```
+
+#### تعریف دستگاه
+- **URL**: `/api/management/define-device/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "category_id": 0,
+    "brand_id": 0,
+    "model": "string",
+    "RAM": "string",
+    "storage": "string",
+    "color": "string",
+    "pack": "string",
+    "network": "string",
+    "is_active": true
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "category": "string",
+    "brand": "string",
+    "model": "string",
+    "RAM": "string",
+    "storage": "string",
+    "color": "string",
+    "pack": "string",
+    "network": "string",
+    "is_active": true
+}
+```
+
+#### تعریف ادمین
+- **URL**: `/api/management/define-admin/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "username": "string",
+    "password": "string",
+    "name": "string",
+    "role": "string"
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "username": "string",
+    "name": "string",
+    "role": "string"
+}
+```
+
+#### تعریف تامین‌کننده
+- **URL**: `/api/management/define-supplier/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Data**:
+```json
+{
+    "username": "string",
+    "password": "string",
+    "name": "string",
+    "phone_number": "string",
+    "is_active": true
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "username": "string",
+    "name": "string",
+    "phone_number": "string",
+    "is_active": true
 }
 ```
 
 ### مدیریت موجودی
 
-#### لیست موجودی‌ها
+#### ثبت موجودی جدید
 - **URL**: `/api/inventory/inventory/`
-- **Method**: `GET`
+- **Method**: `POST`
 - **Headers**: `Authorization: Bearer <token>`
-- **Query Parameters**:
-  - `store`: فیلتر بر اساس فروشگاه
-  - `SKU`: فیلتر بر اساس SKU
-  - `status`: فیلتر بر اساس وضعیت
+- **Permissions**: `inventory`
+- **Data**:
+```json
+{
+    "store_id": 0,
+    "SKU_id": 0,
+    "IMEI": "string",
+    "receive_date": "datetime",
+    "submit_date": "datetime",
+    "discount_rate": 0.0,
+    "status": "string"
+}
+```
 - **Response**:
 ```json
 {
-    "count": 0,
-    "next": "string",
-    "previous": "string",
-    "results": [
-        {
-            "id": 0,
-            "store": "string",
-            "SKU": "string",
-            "IMEI": "string",
-            "status": "string"
-        }
-    ]
+    "id": 0,
+    "store": "string",
+    "SKU": "string",
+    "IMEI": "string",
+    "receive_date": "datetime",
+    "submit_date": "datetime",
+    "discount_rate": 0.0,
+    "status": "string"
 }
 ```
 
 ### مدیریت سفارشات
 
-#### ایجاد سفارش جدید
+#### ثبت سفارش جدید
 - **URL**: `/api/orders/orders/`
 - **Method**: `POST`
 - **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `seller`
 - **Data**:
 ```json
 {
-    "customer": 0,
-    "seller": 0,
+    "customer": {
+        "first_name": "string",
+        "last_name": "string",
+        "national_code": "string",
+        "phone_number": "string",
+        "gender": true,
+        "id_card": "string",
+        "address": "string",
+        "postal_code": "string"
+    },
+    "seller_id": 0,
     "transaction_id": "string",
     "is_full_cash": true,
-    "group_discount": 0,
+    "loan_id": 0,
+    "individual_discount_id": 0,
+    "group_discount_id": 0,
     "items": [
         {
-            "inventory": 0
+            "inventory_id": 0
         }
     ]
 }
@@ -162,13 +351,15 @@ python manage.py runserver
     "id": 0,
     "customer": "string",
     "seller": "string",
+    "order_date": "datetime",
     "transaction_id": "string",
     "is_full_cash": true,
+    "loan": "string",
+    "individual_discount": "string",
     "group_discount": "string",
     "items": [
         {
             "id": 0,
-            "order": 0,
             "inventory": "string",
             "price": 0
         }
@@ -176,104 +367,108 @@ python manage.py runserver
 }
 ```
 
-#### لیست سفارشات
-- **URL**: `/api/orders/orders/`
+### گزارش‌ها
+
+#### گزارش وضعیت انبار فروشگاه
+- **URL**: `/api/reports/store-inventory/`
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin, seller`
 - **Query Parameters**:
-  - `customer`: فیلتر بر اساس مشتری
-  - `seller`: فیلتر بر اساس فروشنده
-  - `is_full_cash`: فیلتر بر اساس نوع پرداخت
+  - `store_id`: شناسه فروشگاه
+  - `from_date`: از تاریخ
+  - `to_date`: تا تاریخ
 - **Response**:
 ```json
 {
-    "count": 0,
-    "next": "string",
-    "previous": "string",
-    "results": [
+    "store": "string",
+    "total_items": 0,
+    "available_items": 0,
+    "sold_items": 0,
+    "items": [
         {
-            "id": 0,
-            "customer": "string",
-            "seller": "string",
-            "transaction_id": "string",
-            "is_full_cash": true,
-            "group_discount": "string",
-            "items": [
-                {
-                    "id": 0,
-                    "order": 0,
-                    "inventory": "string",
-                    "price": 0
-                }
-            ]
+            "SKU": "string",
+            "count": 0,
+            "status": "string"
         }
     ]
 }
 ```
 
-### مدیریت تخفیف‌ها
-
-#### لیست تخفیف‌های گروهی
-- **URL**: `/api/orders/group-discounts/`
+#### گزارش وضعیت کلی فروشگاه‌ها
+- **URL**: `/api/reports/all-stores/`
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
 - **Query Parameters**:
-  - `available`: فیلتر بر اساس در دسترس بودن
+  - `from_date`: از تاریخ
+  - `to_date`: تا تاریخ
 - **Response**:
 ```json
 {
-    "count": 0,
-    "next": "string",
-    "previous": "string",
-    "results": [
+    "total_stores": 0,
+    "active_stores": 0,
+    "stores": [
         {
-            "id": 0,
-            "used_count": 0,
-            "max_use": 0
+            "name": "string",
+            "total_sales": 0,
+            "total_inventory": 0,
+            "performance_rate": 0.0
         }
     ]
 }
 ```
 
-#### لیست تخفیف‌های فردی
-- **URL**: `/api/orders/individual-discounts/`
+#### گزارش موجودی در گردش
+- **URL**: `/api/reports/inventory-circulation/`
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin, inventory`
 - **Query Parameters**:
-  - `customer`: فیلتر بر اساس مشتری
-  - `active`: فیلتر بر اساس فعال بودن
+  - `from_date`: از تاریخ
+  - `to_date`: تا تاریخ
 - **Response**:
 ```json
 {
-    "count": 0,
-    "next": "string",
-    "previous": "string",
-    "results": [
+    "total_items": 0,
+    "total_value": 0,
+    "items": [
         {
-            "id": 0,
-            "active_date": "string",
-            "customer": "string"
+            "SKU": "string",
+            "count": 0,
+            "value": 0,
+            "circulation_days": 0
         }
     ]
 }
 ```
 
-### مدیریت وام‌ها
-
-#### لیست وام‌ها
-- **URL**: `/api/orders/loans/`
+#### گزارش مالی
+- **URL**: `/api/reports/financial/`
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `admin`
+- **Query Parameters**:
+  - `from_date`: از تاریخ
+  - `to_date`: تا تاریخ
+  - `store_id`: شناسه فروشگاه (اختیاری)
 - **Response**:
 ```json
 {
-    "count": 0,
-    "next": "string",
-    "previous": "string",
-    "results": [
+    "total_sales": 0,
+    "total_profit": 0,
+    "total_discount": 0,
+    "total_loan": 0,
+    "portions": {
+        "MCI": 0.0,
+        "store": 0.0,
+        "supplier": 0.0
+    },
+    "daily_report": [
         {
-            "id": 0,
-            "prepayment": 0
+            "date": "date",
+            "sales": 0,
+            "profit": 0
         }
     ]
 }
