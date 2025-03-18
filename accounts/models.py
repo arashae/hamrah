@@ -1,5 +1,35 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('superadmin', 'سوپر ادمین'),
+        ('store_admin', 'ادمین فروشگاه'),
+        ('seller', 'فروشنده'),
+        ('warehouse', 'انباردار'),
+        ('supplier', 'تامین کننده'),
+    )
+
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    full_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=11)
+    national_code = models.CharField(max_length=10)
+    store = models.ForeignKey('management.Store', on_delete=models.CASCADE, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'users'
+        verbose_name = 'کاربر'
+        verbose_name_plural = 'کاربران'
+
+    def __str__(self):
+        return f"{self.full_name} - {self.get_role_display()}"
+
+    def save(self, *args, **kwargs):
+        # اگر کاربر جدید است و رمز عبور تنظیم نشده
+        if not self.pk and not self.password:
+            self.set_password(self.password)
+        super().save(*args, **kwargs)
 
 class Admin(models.Model):
     username = models.CharField(max_length=255, unique=True)
