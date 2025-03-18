@@ -474,6 +474,143 @@ python manage.py runserver
 }
 ```
 
+### مدیریت کاربران فروشگاه
+
+#### ایجاد ادمین فروشگاه
+- **URL**: `/api/accounts/store-admins/create/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `super_admin`
+- **Data**:
+```json
+{
+    "username": "string",
+    "password": "string",
+    "full_name": "string",
+    "phone": "string",
+    "national_code": "string",
+    "store": 0
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "username": "string",
+    "full_name": "string",
+    "phone": "string",
+    "national_code": "string",
+    "role": "store_admin",
+    "role_display": "ادمین فروشگاه",
+    "store": 0,
+    "store_name": "string",
+    "is_active": true
+}
+```
+
+#### لیست ادمین‌های فروشگاه
+- **URL**: `/api/accounts/store-admins/`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `super_admin`
+- **Response**:
+```json
+[
+    {
+        "id": 0,
+        "username": "string",
+        "full_name": "string",
+        "phone": "string",
+        "national_code": "string",
+        "role": "store_admin",
+        "role_display": "ادمین فروشگاه",
+        "store": 0,
+        "store_name": "string",
+        "is_active": true
+    }
+]
+```
+
+#### تغییر وضعیت ادمین فروشگاه
+- **URL**: `/api/accounts/store-admins/<id>/toggle-status/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `super_admin`
+- **Response**:
+```json
+{
+    "status": "success",
+    "is_active": true
+}
+```
+
+#### ایجاد کاربر فروشگاه
+- **URL**: `/api/accounts/store-users/create/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `store_admin`
+- **Data**:
+```json
+{
+    "username": "string",
+    "password": "string",
+    "full_name": "string",
+    "phone": "string",
+    "national_code": "string"
+}
+```
+- **Response**:
+```json
+{
+    "id": 0,
+    "username": "string",
+    "full_name": "string",
+    "phone": "string",
+    "national_code": "string",
+    "role": "seller",
+    "role_display": "فروشنده",
+    "store": 0,
+    "store_name": "string",
+    "is_active": true
+}
+```
+
+#### لیست کاربران فروشگاه
+- **URL**: `/api/accounts/store-users/`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `store_admin`
+- **Response**:
+```json
+[
+    {
+        "id": 0,
+        "username": "string",
+        "full_name": "string",
+        "phone": "string",
+        "national_code": "string",
+        "role": "seller",
+        "role_display": "فروشنده",
+        "store": 0,
+        "store_name": "string",
+        "is_active": true
+    }
+]
+```
+
+#### تغییر وضعیت کاربر فروشگاه
+- **URL**: `/api/accounts/store-users/<id>/toggle-status/`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Permissions**: `store_admin`
+- **Response**:
+```json
+{
+    "status": "success",
+    "is_active": true
+}
+```
+
 ## تست‌ها
 
 برای اجرای تست‌ها:
