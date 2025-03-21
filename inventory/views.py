@@ -8,6 +8,9 @@ from .serializers import (BrandSerializer, CategorySerializer, DeviceSerializer,
                         SupplierSerializer, GuaranteeSerializer, PortionPlanSerializer,
                         SKUSerializer, InventorySerializer)
 from accounts.permissions import IsAdmin, IsSeller
+import logging
+
+logger = logging.getLogger('inventory')
 
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
@@ -54,6 +57,18 @@ class DeviceViewSet(viewsets.ModelViewSet):
         
         return queryset
 
+    def perform_create(self, serializer):
+        device = serializer.save()
+        logger.info(f'Device {device.model} created by {self.request.user.username}')
+
+    @action(detail=True, methods=['post'])
+    def toggle_status(self, request, pk=None):
+        device = self.get_object()
+        device.is_active = not device.is_active
+        device.save()
+        logger.info(f'Device {device.model} {"activated" if device.is_active else "deactivated"} by {request.user.username}')
+        return Response({'status': 'success', 'is_active': device.is_active})
+
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
@@ -63,6 +78,18 @@ class SupplierViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return [permissions.IsAuthenticated()]
         return super().get_permissions()
+
+    def perform_create(self, serializer):
+        supplier = serializer.save()
+        logger.info(f'Supplier {supplier.name} created by {self.request.user.username}')
+
+    @action(detail=True, methods=['post'])
+    def toggle_status(self, request, pk=None):
+        supplier = self.get_object()
+        supplier.is_active = not supplier.is_active
+        supplier.save()
+        logger.info(f'Supplier {supplier.name} {"activated" if supplier.is_active else "deactivated"} by {request.user.username}')
+        return Response({'status': 'success', 'is_active': supplier.is_active})
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def login(self, request):
@@ -100,6 +127,10 @@ class PortionPlanViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return super().get_permissions()
 
+    def perform_create(self, serializer):
+        plan = serializer.save()
+        logger.info(f'Portion plan for category {plan.category.category} created by {self.request.user.username}')
+
 class SKUViewSet(viewsets.ModelViewSet):
     queryset = SKU.objects.all()
     serializer_class = SKUSerializer
@@ -124,6 +155,10 @@ class SKUViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(guarantee_id=guarantee)
         
         return queryset
+
+    def perform_create(self, serializer):
+        sku = serializer.save()
+        logger.info(f'SKU for device {sku.device.model} created by {self.request.user.username}')
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
@@ -152,3 +187,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(IMEI__icontains=imei)
         
         return queryset
+
+    def perform_create(self, serializer):
+        inventory = serializer.save()
+        logger.info(f'Inventory item for SKU {inventory.SKU.id} created by {self.request.user.username}')

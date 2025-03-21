@@ -10,6 +10,20 @@ class User(AbstractUser):
         ('supplier', 'تامین کننده'),
     )
 
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='custom_user_set',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        verbose_name='groups',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='custom_user_set',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
+    )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     full_name = models.CharField(max_length=255)
     phone = models.CharField(max_length=11)
@@ -27,18 +41,9 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         # اگر کاربر جدید است و رمز عبور تنظیم نشده
-        if not self.pk and not self.password:
+        if not self.pk and not self.has_usable_password():
             self.set_password(self.password)
         super().save(*args, **kwargs)
-
-class Admin(models.Model):
-    username = models.CharField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    role = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.username
 
 class Customer(models.Model):
     first_name = models.CharField(max_length=255)
@@ -61,3 +66,33 @@ class Seller(models.Model):
 
     def __str__(self):
         return self.name
+
+class StoreAdmin(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    store = models.ForeignKey('management.Store', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'store_admins'
+        verbose_name = 'ادمین فروشگاه'
+        verbose_name_plural = 'ادمین‌های فروشگاه'
+
+    def __str__(self):
+        return f"{self.user.full_name} - {self.store.name}"
+
+class StoreUser(models.Model):
+    ROLE_CHOICES = (
+        ('seller', 'فروشنده'),
+        ('warehouse', 'انباردار'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    store = models.ForeignKey('management.Store', on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    class Meta:
+        db_table = 'store_users'
+        verbose_name = 'کاربر فروشگاه'
+        verbose_name_plural = 'کاربران فروشگاه'
+
+    def __str__(self):
+        return f"{self.user.full_name} - {self.get_role_display()} - {self.store.name}"

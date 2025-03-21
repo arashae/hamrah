@@ -4,31 +4,22 @@ class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        try:
-            return hasattr(request.user, 'admin')
-        except:
-            return False
+        return request.user.role in ['superadmin', 'store_admin']
 
 class IsSeller(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        try:
-            return hasattr(request.user, 'seller')
-        except:
-            return False
+        return request.user.role == 'seller'
 
 class IsCustomer(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        try:
-            return hasattr(request.user, 'customer')
-        except:
-            return False
+        return request.user.role == 'customer'
 
 class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if hasattr(request.user, 'admin'):
+        if request.user.role in ['superadmin', 'store_admin']:
             return True
         return obj.id == request.user.id 

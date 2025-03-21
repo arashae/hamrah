@@ -3,11 +3,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import (
-    Admin, Company, Province, City, Store, Brand,
+    Company, Province, City, Store, Brand,
     Category, PortionPlan, Device, Supplier
 )
 from .serializers import (
-    AdminSerializer, CompanySerializer, ProvinceSerializer,
+    CompanySerializer, ProvinceSerializer,
     CitySerializer, StoreSerializer, BrandSerializer,
     CategorySerializer, PortionPlanSerializer,
     DeviceSerializer, SupplierSerializer
@@ -16,13 +16,13 @@ import logging
 
 logger = logging.getLogger('management')
 
-class IsAdmin(IsAuthenticated):
+class IsSuperAdmin(IsAuthenticated):
     def has_permission(self, request, view):
         is_authenticated = super().has_permission(request, view)
-        return is_authenticated and request.user.role == 'admin'
+        return is_authenticated and request.user.role == 'superadmin'
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def manage_provinces(request):
     """مدیریت استان‌ها"""
     if request.method == 'GET':
@@ -39,7 +39,7 @@ def manage_provinces(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def manage_cities(request):
     """مدیریت شهرها"""
     if request.method == 'GET':
@@ -60,7 +60,7 @@ def manage_cities(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_company(request):
     """تعریف شرکت جدید"""
     serializer = CompanySerializer(data=request.data)
@@ -71,7 +71,7 @@ def define_company(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_store(request):
     """تعریف فروشگاه جدید"""
     serializer = StoreSerializer(data=request.data)
@@ -82,7 +82,7 @@ def define_store(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_brand(request):
     """تعریف برند جدید"""
     serializer = BrandSerializer(data=request.data)
@@ -93,7 +93,7 @@ def define_brand(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_type(request):
     """تعریف نوع دستگاه جدید"""
     serializer = CategorySerializer(data=request.data)
@@ -104,7 +104,7 @@ def define_type(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_portion_plan(request):
     """تعریف طرح سهم‌بندی جدید"""
     serializer = PortionPlanSerializer(data=request.data)
@@ -115,7 +115,7 @@ def define_portion_plan(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_device(request):
     """تعریف دستگاه جدید"""
     serializer = DeviceSerializer(data=request.data)
@@ -126,10 +126,11 @@ def define_device(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_admin(request):
     """تعریف ادمین جدید"""
-    serializer = AdminSerializer(data=request.data)
+    from accounts.serializers import StoreAdminSerializer
+    serializer = StoreAdminSerializer(data=request.data)
     if serializer.is_valid():
         admin = serializer.save()
         logger.info(f'Admin {admin.username} created by {request.user.username}')
@@ -137,7 +138,7 @@ def define_admin(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def define_supplier(request):
     """تعریف تامین‌کننده جدید"""
     serializer = SupplierSerializer(data=request.data)
@@ -148,7 +149,7 @@ def define_supplier(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def toggle_store_status(request, store_id):
     """فعال/غیرفعال کردن فروشگاه"""
     try:
@@ -161,7 +162,7 @@ def toggle_store_status(request, store_id):
         return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def toggle_device_status(request, device_id):
     """فعال/غیرفعال کردن دستگاه"""
     try:
@@ -174,7 +175,7 @@ def toggle_device_status(request, device_id):
         return Response({'error': 'Device not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def toggle_supplier_status(request, supplier_id):
     """فعال/غیرفعال کردن تامین‌کننده"""
     try:
@@ -187,7 +188,7 @@ def toggle_supplier_status(request, supplier_id):
         return Response({'error': 'Supplier not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def search_stores(request):
     """جستجو در فروشگاه‌ها"""
     name = request.query_params.get('name', '')
@@ -209,7 +210,7 @@ def search_stores(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def search_devices(request):
     """جستجو در دستگاه‌ها"""
     model = request.query_params.get('model', '')
@@ -231,7 +232,7 @@ def search_devices(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes([IsAdmin])
+@permission_classes([IsSuperAdmin])
 def search_suppliers(request):
     """جستجو در تامین‌کنندگان"""
     name = request.query_params.get('name', '')
