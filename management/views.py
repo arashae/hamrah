@@ -137,16 +137,55 @@ def define_admin(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
 @permission_classes([IsSuperAdmin])
-def define_supplier(request):
-    """تعریف تامین‌کننده جدید"""
-    serializer = SupplierSerializer(data=request.data)
-    if serializer.is_valid():
-        supplier = serializer.save()
-        logger.info(f'Supplier {supplier.name} created by {request.user.username}')
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def define_supplier(request, supplier_id=None):
+    """تعریف و مدیریت تامین‌کننده"""
+    if request.method == 'GET':
+        if supplier_id:
+            try:
+                supplier = Supplier.objects.get(id=supplier_id)
+                serializer = SupplierSerializer(supplier)
+                return Response(serializer.data)
+            except Supplier.DoesNotExist:
+                return Response({'error': 'Supplier not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            suppliers = Supplier.objects.all()
+            serializer = SupplierSerializer(suppliers, many=True)
+            return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = SupplierSerializer(data=request.data)
+        if serializer.is_valid():
+            supplier = serializer.save()
+            logger.info(f'Supplier {supplier.name} created by {request.user.username}')
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'PUT':
+        if not supplier_id:
+            return Response({'error': 'Supplier ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            supplier = Supplier.objects.get(id=supplier_id)
+            serializer = SupplierSerializer(supplier, data=request.data, partial=True)
+            if serializer.is_valid():
+                supplier = serializer.save()
+                logger.info(f'Supplier {supplier.name} updated by {request.user.username}')
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Supplier.DoesNotExist:
+            return Response({'error': 'Supplier not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    elif request.method == 'DELETE':
+        if not supplier_id:
+            return Response({'error': 'Supplier ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            supplier = Supplier.objects.get(id=supplier_id)
+            supplier.delete()
+            logger.info(f'Supplier {supplier.name} deleted by {request.user.username}')
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Supplier.DoesNotExist:
+            return Response({'error': 'Supplier not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 @permission_classes([IsSuperAdmin])

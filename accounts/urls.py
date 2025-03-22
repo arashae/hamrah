@@ -1,5 +1,9 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
+
+router = DefaultRouter()
+router.register(r'customers', views.CustomerViewSet)
 
 urlpatterns = [
     # URLs مربوط به احراز هویت
@@ -15,4 +19,11 @@ urlpatterns = [
     path('store-users/', views.store_user_list, name='store-user-list'),
     path('store-users/create/', views.create_store_user, name='create-store-user'),
     path('store-users/<int:user_id>/toggle-status/', views.toggle_store_user_status, name='toggle-store-user-status'),
+
+    # URLs پروفایل کاربر
+    path('profile/', views.user_profile, name='user-profile'),
+    path('change-password/', views.change_password, name='change-password'),
+
+    # URLs مربوط به مشتریان
+    path('', include(router.urls)),
 ] 

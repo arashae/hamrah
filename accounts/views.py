@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from .models import User
-from .serializers import UserSerializer, StoreUserSerializer, StoreAdminSerializer
+from .models import User, Customer
+from .serializers import UserSerializer, StoreUserSerializer, StoreAdminSerializer, CustomerSerializer
 from .permissions import IsAdmin, IsSeller
 import logging
 
@@ -128,3 +128,65 @@ def toggle_store_user_status(request, user_id):
         return Response({'status': 'success', 'is_active': user.is_active})
     except User.DoesNotExist:
         return Response({'error': 'Store user not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAdmin|IsSeller]
+
+    def get_queryset(self):
+        queryset = Customer.objects.all()
+        national_code = self.request.query_params.get('national_code', None)
+        phone_number = self.request.query_params.get('phone_number', None)
+        name = self.request.query_params.get('name', None)
+
+        if national_code is not None:
+            queryset = queryset.filter(national_code=national_code)
+        if phone_number is not None:
+            queryset = queryset.filter(phone_number=phone_number)
+        if name is not None:
+            queryset = queryset.filter(first_name__icontains=name) | queryset.filter(last_name__icontains=name)
+        
+        return queryset
+
+    def perform_create(self, serializer):
+        customer = serializer.save()
+        logger.info(f'Customer {customer.first_name} {customer.last_name} created by {self.request.user.username}')
+
+    def perform_update(self, serializer):
+        customer = serializer.save()
+        logger.info(f'Customer {customer.first_name} {customer.last_name} updated by {self.request.user.username}')
+
+    def perform_destroy(self, instance):
+        logger.info(f'Customer {instance.first_name} {instance.last_name} deleted by {self.request.user.username}')
+        instance.delete()
+
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    """نمایش و ویرایش پروفایل کاربر"""
+    if request.method == 'GET':
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+    
+    serializer = UserSerializer(request.user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        logger.info(f'User profile updated by {request.user.username}')
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """تغییر رمز عبور کاربر"""
+    old_password = request.data.get('old_password')
+    new_password = request.data.get('new_password')
+
+    if not request.user.check_password(old_password):
+        return Response({'error': 'رمز عبور فعلی اشتباه است'}, status=status.HTTP_400_BAD_REQUEST)
+
+    request.user.set_password(new_password)
+    request.user.save()
+    logger.info(f'Password changed for user {request.user.username}')
+    return Response({'status': 'success'})

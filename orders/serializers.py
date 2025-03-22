@@ -8,41 +8,36 @@ from accounts.models import Customer
 class IndividualDiscountSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndividualDiscount
-        fields = ['id', 'customer', 'sku', 'discount_percent', 'start_date', 'end_date']
+        fields = ['id', 'customer', 'active_date']
 
 class GroupDiscountSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupDiscount
-        fields = ['id', 'sku', 'discount_percent', 'start_date', 'end_date']
+        fields = ['id', 'used_count', 'max_use']
 
 class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
-        fields = ['id', 'customer', 'amount', 'installments', 'monthly_payment', 'start_date']
+        fields = ['id', 'prepayment', 'amount', 'installments', 'monthly_payment', 'start_date']
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    sku = SKUSerializer(read_only=True)
-    sku_id = serializers.PrimaryKeyRelatedField(
-        queryset=SKU.objects.all(), source='sku', write_only=True
-    )
+    sku = serializers.CharField(source='inventory.sku', read_only=True)
+    sku_id = serializers.IntegerField(source='inventory.id', read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'order', 'sku', 'sku_id', 'quantity', 'unit_price', 'discount_percent']
+        fields = ['id', 'order', 'inventory', 'price', 'quantity', 'sku', 'sku_id']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     customer = CustomerSerializer(read_only=True)
     seller = UserSerializer(read_only=True)
-    customer_id = serializers.PrimaryKeyRelatedField(
-        queryset=Customer.objects.all(), source='customer', write_only=True
-    )
+    customer_id = serializers.IntegerField(source='customer.id', read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'customer_id', 'seller', 'items', 'total_amount',
-                 'discount_amount', 'final_amount', 'status', 'created_at']
-        read_only_fields = ['seller', 'total_amount', 'discount_amount', 'final_amount']
+        fields = ['id', 'customer', 'customer_id', 'seller', 'items', 'order_date', 'transaction_id', 'is_full_cash', 'loan', 'individual_discount', 'group_discount', 'status']
+        read_only_fields = ['seller', 'order_date', 'status']
 
     def create(self, validated_data):
         validated_data['seller'] = self.context['request'].user

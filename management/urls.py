@@ -27,6 +27,7 @@ urlpatterns = [
     
     # مدیریت تامین‌کنندگان
     path('suppliers/define/', views.define_supplier, name='define-supplier'),
+    path('suppliers/define/<int:supplier_id>/', views.define_supplier, name='define-supplier-detail'),
     path('suppliers/<int:supplier_id>/toggle-status/', views.toggle_supplier_status, name='toggle-supplier-status'),
     path('suppliers/search/', views.search_suppliers, name='search-suppliers'),
 ] 

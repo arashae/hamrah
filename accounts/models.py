@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password
 from django.db import models
 
 class User(AbstractUser):
@@ -55,6 +56,11 @@ class Customer(models.Model):
     address = models.TextField(max_length=512)
     postal_code = models.CharField(max_length=10)
 
+    class Meta:
+        db_table = 'customers'
+        verbose_name = 'مشتری'
+        verbose_name_plural = 'مشتریان'
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -62,7 +68,12 @@ class Seller(models.Model):
     username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    store = models.ForeignKey('store.Store', on_delete=models.CASCADE)
+    store = models.ForeignKey('management.Store', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'sellers'
+        verbose_name = 'فروشنده'
+        verbose_name_plural = 'فروشندگان'
 
     def __str__(self):
         return self.name
